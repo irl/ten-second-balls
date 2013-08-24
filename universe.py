@@ -1,4 +1,3 @@
-#!/usr/bin/env python27
 #
 # Ten Second Balls
 # Copyright (C) 2013 Iain Learmonth
