@@ -24,6 +24,7 @@ from pygame.locals import *
 from pygame.color import *
 import pymunk
 from pymunk.pygame_util import draw_space
+from universe import Universe
 
 dx = dy = jump = 0
 
@@ -50,16 +51,6 @@ def add_finish(space, x, y):
     space.add(body, shape)
     return (body, shape)
 
-def add_block(space, x, y):
-    inertia = pymunk.moment_for_circle(1, 0, 14, (dx,0))
-    body = pymunk.Body(1, inertia) 
-    shape = pymunk.Circle(body, 14)
-    body.position = x, y 
-    shape.collision_type = 3
-    shape.color = THECOLORS['purple']
-    space.add(body, shape)
-    return shape
-
 def add_player(space):
     mass = 1
     radius = 14
@@ -80,49 +71,25 @@ def draw_player(screen, player):
 def main():
     global dx, dy, jump, dead
 
-    pygame.init()
-    screen = pygame.display.set_mode((600, 600))
-    pygame.display.set_caption("Ludum Dare 27 - 10 Seconds - A thing by irl")
-    clock = pygame.time.Clock()
+
     running = True
 
-    space = pymunk.Space()
-    space.gravity = (0.0, -900.0)
+    universe = Universe()
 
-    universe_walls = [pymunk.Segment(space.static_body, (50, 50), (50, 550), 5)
-                ,pymunk.Segment(space.static_body, (50, 550), (550, 550), 5)
-                ,pymunk.Segment(space.static_body, (550, 550), (550, 50), 5)
-                ,pymunk.Segment(space.static_body, (50, 50), (550, 50), 5)
-                ,pymunk.Segment(space.static_body, (50, 500), (500, 500), 5)
-                ,pymunk.Segment(space.static_body, (100, 450), (550, 450), 5)
-                ,pymunk.Segment(space.static_body, (50, 400), (500, 400), 5)
-                ,pymunk.Segment(space.static_body, (100, 350), (550, 350), 5)
-                ,pymunk.Segment(space.static_body, (50, 210.8), (250, 210), 5)
-                ,pymunk.Segment(space.static_body, (250, 300), (500, 300), 5)
-                ,pymunk.Segment(space.static_body, (250, 300), (250, 210), 5)
-                ,pymunk.Segment(space.static_body, (500, 200), (550, 200.5), 5)
-                ,pymunk.Segment(space.static_body, (500, 200), (500, 100), 5)
-                ,pymunk.Segment(space.static_body, (300, 100), (500, 100), 5)
-                ,pymunk.Segment(space.static_body, (300, 100), (300, 200), 5)
-                ]
+#    player_body, player_shape = add_player(space)
 
-    for wall in universe_walls:
-        wall.friction = 1.6
+    universe.add_block(165, 450)
+    universe.add_block(465, 350)
 
-    space.add(universe_walls)
+#    finish_body, finish_shape = add_finish(space, 150, 150)
 
-    player_body, player_shape = add_player(space)
-    (add_block(space, 165, 450)).collision_type = 3
-    (add_block(space, 465, 350)).collision_type = 3
-
-    finish_body, finish_shape = add_finish(space, 150, 150)
-
-    space.add_collision_handler(2, 3, post_solve=activate_bomb)
-    space.add_collision_handler(1, 2, post_solve=win)
+#    space.add_collision_handler(2, 3, post_solve=activate_bomb)
+#    space.add_collision_handler(1, 2, post_solve=win)
 
     while running:
 
         dy = 0
+
         if jump > 0:
             jump -= 1
 
@@ -148,25 +115,23 @@ def main():
                 if event.key == K_w:
                     dy = 0
 
-        player_body.apply_impulse((dx,dy))
+#        player_body.apply_impulse((dx,dy))
 
-        screen.fill(THECOLORS['black'])
-        draw_space(screen, space)
 
-        space.step(1/50.0)
 
-        for shape in space.shapes:
-            if shape.collision_type > 5:
-               shape.collision_type -= 1
-            if shape.collision_type == 5:
-               dead.append(shape)
+#        for shape in space.shapes:
+#            if shape.collision_type > 5:
+#               shape.collision_type -= 1
+#            if shape.collision_type == 5:
+#               dead.append(shape)
 
-        for shape in dead:
-            space.remove(shape)
-        dead = []
+#        for shape in dead:
+#            space.remove(shape)
+#        dead = []
 
-        pygame.display.flip()
-        clock.tick(50)
+        universe.tick()
+
+
 
 if __name__ == '__main__':
     sys.exit(main())
