@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+import sys
 import pygame
 from pygame.locals import *
 from pygame.color import *
@@ -55,6 +56,9 @@ class Universe:
                 ]
         space.add(universe_walls)
 
+        space.add_collision_handler(2, 3, post_solve=activate_bomb)
+        space.add_collision_handler(1, 2, post_solve=win)
+
     def add_block(self, x, y):
         inertia = pymunk.moment_for_circle(1, 0, 14, (0,0))
         body = pymunk.Body(1, inertia) 
@@ -65,9 +69,39 @@ class Universe:
         self.space.add(body, shape)
         return shape
 
+    def add_finish(self, x, y):
+        body = pymunk.Body(pymunk.inf, pymunk.inf)
+        shape = pymunk.Circle(body, 25)
+        body.position = x, y 
+        shape.collision_type = 1
+        shape.color = THECOLORS['yellow']
+        self.space.add(body, shape)
+
     def tick(self):
         self.screen.fill(THECOLORS['black'])
         draw_space(self.screen, self.space)
         self.space.step(1/50.0)
         pygame.display.flip()
         self.clock.tick(50)
+
+        dead_blocks = []
+
+        for shape in self.space.shapes:
+            if shape.collision_type > 5:
+               shape.collision_type -= 1
+            if shape.collision_type == 5:
+               dead_blocks.append(shape)
+        for shape in dead_blocks:
+            self.space.remove(shape)
+
+def win(space, arbiter):
+    print "YOU WIN!"
+    sys.exit()
+
+def activate_bomb(space, arbiter):
+    print "Bomb activated"
+    for shape in arbiter.shapes:
+        if shape.collision_type == 3:
+            shape.collision_type = 600
+            shape.color = THECOLORS['red']
+

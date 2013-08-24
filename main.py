@@ -18,81 +18,31 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import sys, random
-import pygame
+import sys, pygame
 from pygame.locals import *
-from pygame.color import *
-import pymunk
-from pymunk.pygame_util import draw_space
 from universe import Universe
+from player import Player
 
 dx = dy = jump = 0
 
 dead = []
 
-def win(space, arbiter):
-    print "YOU WIN!"
-    sys.exit()
-
-def activate_bomb(space, arbiter):
-    print "Bomb activated"
-    for shape in arbiter.shapes:
-        if shape.collision_type == 3:
-            shape.collision_type = 600
-            shape.color = THECOLORS['red']
-                
-
-def add_finish(space, x, y):
-    body = pymunk.Body(pymunk.inf, pymunk.inf)
-    shape = pymunk.Circle(body, 25)
-    body.position = x, y 
-    shape.collision_type = 1
-    shape.color = THECOLORS['yellow']
-    space.add(body, shape)
-    return (body, shape)
-
-def add_player(space):
-    mass = 1
-    radius = 14
-    inertia = pymunk.moment_for_circle(mass, 0, radius, (dx,0))
-    body = pymunk.Body(mass, inertia) 
-    body.position = 65, 550
-    body.friction = 0.6
-    shape = pymunk.Circle(body, radius)
-    shape.collision_type = 2
-    shape.color = THECOLORS['blue']
-    space.add(body, shape)
-    return (body, shape)
-
-def draw_player(screen, player):
-    p = int(player.body.position.x), 600-int(player.body.position.y)
-    pygame.draw.circle(screen, THECOLORS["blue"], p, int(player.radius), 2)
-
 def main():
     global dx, dy, jump, dead
-
 
     running = True
 
     universe = Universe()
-
-#    player_body, player_shape = add_player(space)
+    player = Player(universe)
 
     universe.add_block(165, 450)
     universe.add_block(465, 350)
 
-#    finish_body, finish_shape = add_finish(space, 150, 150)
-
-#    space.add_collision_handler(2, 3, post_solve=activate_bomb)
-#    space.add_collision_handler(1, 2, post_solve=win)
+    universe.add_finish(150,150)
 
     while running:
 
-        dy = 0
-
-        if jump > 0:
-            jump -= 1
-
+        # Process events
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
@@ -115,25 +65,16 @@ def main():
                 if event.key == K_w:
                     dy = 0
 
-#        player_body.apply_impulse((dx,dy))
+        # Make player move
+        player.act(dx, dy)
 
-
-
-#        for shape in space.shapes:
-#            if shape.collision_type > 5:
-#               shape.collision_type -= 1
-#            if shape.collision_type == 5:
-#               dead.append(shape)
-
-#        for shape in dead:
-#            space.remove(shape)
-#        dead = []
+        # Jump limiting
+        dy = 0
+        if jump > 0:
+            jump -= 1
 
         universe.tick()
 
-
-
 if __name__ == '__main__':
     sys.exit(main())
-
 
