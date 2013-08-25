@@ -44,6 +44,9 @@ def main():
         player = Player(universe)
         running = True
 
+        pygame.mixer.music.load("music.flac")
+        pygame.mixer.music.play(-1)
+
         while running:
             # Process events
             for event in pygame.event.get():
@@ -80,6 +83,27 @@ def main():
             universe.tick()
             if universe.won:
                 running = False
+
+        pygame.mixer.music.stop()
+        screen = pygame.display.set_mode((600,600))
+        done_image = pygame.image.load("done.png")
+        screen.blit(done_image, start_image.get_rect())
+        pygame.display.flip()
+
+        while True:
+            event = pygame.event.poll()
+            if event.type == KEYUP and event.key == K_SPACE:
+                break
+        
+    all_done_image = pygame.image.load("alldone.png")
+    screen.blit(all_done_image, start_image.get_rect())
+    pygame.display.flip()
+
+    while True:
+        event = pygame.event.poll()
+        if event.type == KEYUP and event.key == K_SPACE:
+            break
+        
 
 if __name__ == '__main__':
     sys.exit(main())
