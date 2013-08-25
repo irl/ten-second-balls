@@ -17,7 +17,6 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
-import sys
 import pygame
 from pygame.locals import *
 from pygame.color import *
@@ -32,6 +31,7 @@ class Universe:
         self.screen = pygame.display.set_mode((600, 600))
         pygame.display.set_caption("Ludum Dare 27 - 10 Seconds - A thing by irl")
         self.clock = pygame.time.Clock()
+        self.won = self.lost = False
 
         # Set up space
         self.space = space = pymunk.Space()
@@ -40,8 +40,8 @@ class Universe:
         # Set up walls
         space.add(level.get_universe_walls(space))
 
-        space.add_collision_handler(2, 3, post_solve=activate_bomb)
-        space.add_collision_handler(1, 2, post_solve=win)
+        space.add_collision_handler(2, 3, post_solve=self.activate_bomb)
+        space.add_collision_handler(1, 2, post_solve=self.win)
 
         # Set up blocks
         for block in level.blocks:
@@ -87,14 +87,14 @@ class Universe:
         for shape in dead_blocks:
             self.space.remove(shape)
 
-def win(space, arbiter):
-    print "YOU WIN!"
-    sys.exit()
+    def win(self, space, arbiter):
+        print "YOU WIN!"
+        self.won = True
 
-def activate_bomb(space, arbiter):
-    print "Bomb activated"
-    for shape in arbiter.shapes:
-        if shape.collision_type == 3:
-            shape.collision_type = 600
-            shape.color = THECOLORS['red']
+    def activate_bomb(self, space, arbiter):
+        print "Bomb activated"
+        for shape in arbiter.shapes:
+            if shape.collision_type == 3:
+                shape.collision_type = 600
+                shape.color = THECOLORS['red']
 

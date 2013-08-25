@@ -22,51 +22,64 @@ import sys, pygame
 from pygame.locals import *
 from universe import Universe
 from player import Player
-import level1
+import level1, level2
+
+levels = [level1, level2]
 
 def main():
     dx = dy = jump = 0
 
-    running = True
+    screen = pygame.display.set_mode((600,600))
+    start_image = pygame.image.load("start.png")
+    screen.blit(start_image, start_image.get_rect())
+    pygame.display.flip()
 
-    universe = Universe(level1)
-    player = Player(universe)
+    while True:
+        event = pygame.event.poll()
+        if event.type == KEYUP and event.key == K_SPACE:
+            break
 
-    while running:
+    for level in levels:
+        universe = Universe(level)
+        player = Player(universe)
+        running = True
 
-        # Process events
-        for event in pygame.event.get():
-            if event.type == QUIT:
+        while running:
+            # Process events
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    running = False
+                    break
+                elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                    running = False
+                    break
+                elif event.type == KEYDOWN:
+                    if event.key == K_d:
+                        dx = 10
+                    if event.key == K_a:
+                        dx = -10
+                    if event.key == K_w:
+                        if jump == 0:
+                            dy = 350
+                            jump = 35
+                elif event.type == KEYUP:
+                    if event.key == K_d or event.key == K_a:
+                        dx = 0
+                    if event.key == K_w:
+                        dy = 0
+
+            # Make player move
+            player.act(dx, dy)
+
+            # Jump limiting
+            dy = 0
+            if jump > 0:
+                jump -= 1
+
+            # SIMULATE!
+            universe.tick()
+            if universe.won:
                 running = False
-                break
-            elif event.type == KEYDOWN and event.key == K_ESCAPE:
-                running = False
-                break
-            elif event.type == KEYDOWN:
-                if event.key == K_d:
-                    dx = 10
-                if event.key == K_a:
-                    dx = -10
-                if event.key == K_w:
-                    if jump == 0:
-                        dy = 350
-                        jump = 35
-            elif event.type == KEYUP:
-                if event.key == K_d or event.key == K_a:
-                    dx = 0
-                if event.key == K_w:
-                    dy = 0
-
-        # Make player move
-        player.act(dx, dy)
-
-        # Jump limiting
-        dy = 0
-        if jump > 0:
-            jump -= 1
-
-        # SIMULATE!
-        universe.tick()
 
 if __name__ == '__main__':
     sys.exit(main())
