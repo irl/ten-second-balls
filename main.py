@@ -1,4 +1,4 @@
-#!/usr/bin/env python27
+#!/usr/bin/env python
 #
 #   Ten Second Balls
 #   Copyright (C) 2013  Iain Learmonth
@@ -22,23 +22,15 @@ import sys, pygame
 from pygame.locals import *
 from universe import Universe
 from player import Player
-
-dx = dy = jump = 0
-
-dead = []
+import level1
 
 def main():
-    global dx, dy, jump, dead
+    dx = dy = jump = 0
 
     running = True
 
-    universe = Universe()
+    universe = Universe(level1)
     player = Player(universe)
-
-    universe.add_block(165, 450)
-    universe.add_block(465, 350)
-
-    universe.add_finish(150,150)
 
     while running:
 
@@ -73,6 +65,7 @@ def main():
         if jump > 0:
             jump -= 1
 
+        # SIMULATE!
         universe.tick()
 
 if __name__ == '__main__':

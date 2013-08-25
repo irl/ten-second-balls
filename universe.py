@@ -26,7 +26,7 @@ from pymunk.pygame_util import draw_space
 
 class Universe:
 
-    def __init__(self):
+    def __init__(self, level):
         # Initialisation
         pygame.init()
         self.screen = pygame.display.set_mode((600, 600))
@@ -38,26 +38,19 @@ class Universe:
         space.gravity = (0.0, -900.0)
 
         # Set up walls
-        universe_walls = [pymunk.Segment(space.static_body, (50, 50), (50, 550), 5)
-                ,pymunk.Segment(space.static_body, (50, 550), (550, 550), 5)
-                ,pymunk.Segment(space.static_body, (550, 550), (550, 50), 5)
-                ,pymunk.Segment(space.static_body, (50, 50), (550, 50), 5)
-                ,pymunk.Segment(space.static_body, (50, 500), (500, 500), 5)
-                ,pymunk.Segment(space.static_body, (100, 450), (550, 450), 5)
-                ,pymunk.Segment(space.static_body, (50, 400), (500, 400), 5)
-                ,pymunk.Segment(space.static_body, (100, 350), (550, 350), 5)
-                ,pymunk.Segment(space.static_body, (50, 210.8), (250, 210), 5)
-                ,pymunk.Segment(space.static_body, (250, 300), (500, 300), 5)
-                ,pymunk.Segment(space.static_body, (250, 300), (250, 210), 5)
-                ,pymunk.Segment(space.static_body, (500, 200), (550, 200.5), 5)
-                ,pymunk.Segment(space.static_body, (500, 200), (500, 100), 5)
-                ,pymunk.Segment(space.static_body, (300, 100), (500, 100), 5)
-                ,pymunk.Segment(space.static_body, (300, 100), (300, 200), 5)
-                ]
-        space.add(universe_walls)
+        space.add(level.get_universe_walls(space))
 
         space.add_collision_handler(2, 3, post_solve=activate_bomb)
         space.add_collision_handler(1, 2, post_solve=win)
+
+        # Set up blocks
+        for block in level.blocks:
+            x, y = block
+            self.add_block(x, y)
+
+        # Set up finish
+        x, y = level.finish
+        self.add_finish(x, y)
 
     def add_block(self, x, y):
         inertia = pymunk.moment_for_circle(1, 0, 14, (0,0))
